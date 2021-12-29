@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="text/javascript" src="js/util.js"></script>
+    <script type="text/javascript" src="js/math.js"></script>
+    <script type="text/javascript" src="js/algebra.js"></script>
+    <script type="text/javascript" src="js/physics.js"></script>
+    <script type="text/javascript" src="js/parser.js"></script>
+    <script type="text/javascript" src="js/view.js"></script>
+    <script type="text/javascript" src="js/draw.js"></script>
+    <script type="text/javascript" src="js/simulator.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
+</head>
+
+<body>
+    <div id="content">
+        <canvas id="canvas"></canvas>
+        <div id="toolbar">
+            <div>Lagrangian <input id="lagrangian" /></div>
+            <button id="button-start">Start</button>
+            <button id="button-stop">Stop</button>
+            <button id="button-reset">Reset</button>
+        </div>
+        <div id="panel">
+            <div>
+                <div class="heading">Variables</div>
+                <div id="variable-definitions"></div>
+                <button id="button-new-variable">new variable</button>
+            </div>
+            <div>
+                <div class="heading">Rendering</div>
+                <textarea id="render-script" oninput="this.style.height='1px';this.style.height=this.scrollHeight+'px';"></textarea>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,124 @@
+// export type Operand = 'add' | 'mul' | 'pow'
+    // export type Expression = number | Symbol | Operation
+
+    // export class Operation {
+    //     f: Operand;
+    //     args: Expression[];
+
+    //     constructor(f: Operand, args: Expression[]) {
+    //         this.f = f;
+    //         this.args = args;
+    //     }
+    // };
+
+    // export class Symbol {
+    //     name: string;
+
+    //     constructor(name: string) {
+    //         this.name = name;
+    //     }
+    // }
+
+    // export function exprToFunction(expr: Expression, Symbols: Symbol[] = []): Function {
+    //     return new Function(...(Symbols.map(x => x.name)), `return ${exprToString(expr)};`);
+    // }
+
+    // export function exprToString(expr: Expression): string {
+    //     if (typeof (expr) === 'number') return expr.toString();
+    //     if (expr instanceof Symbol) return expr.name;
+    //     if (expr instanceof Operation) {
+    //         switch (expr.f) {
+    //             case 'add': return expr.args.map(a => `(${exprToString(a)})`).join('+');
+    //             case 'mul': return expr.args.map(a => `(${exprToString(a)})`).join('*');
+    //             case 'pow': return `(${exprToString(expr.args[0])})^(${exprToString(expr.args[1])})`;
+    //         }
+    //     }
+    //     return undefined;
+    // }
+
+    // export function add(args: Expression[]): Expression {
+    //     // Shortcuts
+    //     if (args.length == 0) return 0.0;
+    //     if (args.length == 1) return args[0];
+
+    //     // Add up all constants, unfold all sums
+    //     const reduced: Expression[] = [];
+    //     let constants = 0.0;
+    //     for (let a of args) {
+    //         if (typeof (a) === 'number') constants += a;
+    //         else if (a instanceof Operation && a.f === 'add') reduced.push(...(a.args));
+    //         else reduced.push(a);
+    //     }
+    //     if (constants != 0.0) reduced.push(constants);
+    //     if (reduced.length == 0) return 0.0;
+    //     if (reduced.length == 1) return reduced[0];
+    //     return new Operation('add', reduced);
+    // }
+
+    // export function multiply(args: Expression[]): Expression {
+    //     // Shortcuts
+    //     if (args.length == 0) return 1.0;
+    //     if (args.length == 1) return args[0];
+
+    //     // Multiply all constants, unfold all products
+    //     const reduced: Expression[] = [];
+    //     let constants = 1.0;
+    //     for (let a of args) {
+    //         if (typeof (a) === 'number') constants *= a;
+    //         else if (a instanceof Operation && a.f === 'mul') reduced.push(...(a.args));
+    //         else reduced.push(a);
+    //     }
+    //     if (constants == 0.0) return 0.0;
+    //     if (constants != 1.0) reduced.push(constants);
+    //     if (reduced.length == 0) return 1.0;
+    //     if (reduced.length == 1) return reduced[0];
+    //     return new Operation('mul', reduced);
+    // }
+
+    // // export function pow(base: Expression[], exp: number) : Expression {
+    // //     return new 
+    // // }
+
+    // export function negate(expr: Expression): Expression {
+    //     if (typeof (expr) === 'number') return -expr;
+    //     else return multiply([-1.0, expr]);
+    // }
+
+    // export function derivative(expr: Expression, x: Symbol): Expression {
+    //     if (typeof (expr) === 'number') return 0.0;
+    //     if (expr instanceof Symbol) return (expr === x) ? 1.0 : 0.0;
+    //     if (expr instanceof Operation) {
+    //         switch (expr.f) {
+    //             case 'add': return add(expr.args.map(a => derivative(a, x)));
+    //             case 'mul':
+    //                 const terms = [];
+    //                 for (let i = 0; i < expr.args.length; ++i) {
+    //                     terms.push(multiply(expr.args.slice(0, i)
+    //                         .concat([derivative(expr.args[i], x)])
+    //                         .concat(expr.args.slice(i + 1))));
+    //                 }
+    //                 return add(terms);
+    //         }
+    //     }
+    // }
+
+    // export function timeDerivative(expr: Expression, vars: { [key: string]: Symbol }): Expression {
+    //     if (typeof (expr) === 'number') return 0.0;
+    //     if (expr instanceof Symbol) {
+    //         if (expr.name in vars)
+    //             return vars[expr.name];
+    //         else
+    //             return 0.0;
+    //     }
+    //     if (expr instanceof Operation) {
+    //         switch (expr.f) {
+    //             case 'add': return add(expr.args.map(a => timeDerivative(a, vars)));
+    //             case 'mul':
+    //                 return add(expr.args.map(a => {
+    //                     const term = expr.args.filter(b => (b !== a));
+    //                     term.push(timeDerivative(a, vars));
+    //                     return multiply(term);
+    //                 }));
+    //         }
+    //     }
+    // }
