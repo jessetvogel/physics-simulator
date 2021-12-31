@@ -2,9 +2,8 @@ var Physics;
 (function (Physics) {
     class System {
         constructor() {
-            this.variables = { symbols: [], state: [] };
-            this.velocities = { symbols: [], state: [] };
-            this.constants = { symbols: [], state: [] };
+            this.variables = { symbols: [], values: [], velocities: [] };
+            this.constants = { symbols: [], values: [] };
             this.timeDerivatives = {};
             this.lagrangian = null;
             this.equations = [];
@@ -16,20 +15,19 @@ var Physics;
             this.timeDerivatives[x] = v;
             this.timeDerivatives[v] = a;
             this.variables.symbols.push(x);
-            this.variables.state.push(x0);
-            this.velocities.symbols.push(v);
-            this.velocities.state.push(v0);
+            this.variables.values.push(x0);
+            this.variables.velocities.push(v0);
         }
         addConstant(c, c0) {
             this.constants.symbols.push(c);
-            this.constants.state.push(c0);
+            this.constants.values.push(c0);
         }
         setLagrangian(lagrangian) {
             this.lagrangian = lagrangian;
             const parser = new Parser.Parser(lagrangian);
             const symbols = [
                 ...this.variables.symbols,
-                ...this.velocities.symbols,
+                ...this.variables.symbols.map(x => `d${x}`),
                 ...this.constants.symbols
             ];
             parser.setSymbols(symbols);
@@ -46,7 +44,7 @@ var Physics;
             const n = this.variables.symbols.length;
             const A = new Array(n);
             const b = new Array(n);
-            const as = this.velocities.symbols.map(v => this.timeDerivatives[v]);
+            const as = this.variables.symbols.map(x => `dd${x}`);
             for (let i = 0; i < n; ++i) {
                 const coeffs = Algebra.coefficients(this.equations[i], as);
                 A[i] = coeffs.slice(0, n);
@@ -63,27 +61,29 @@ var Physics;
         }
         update(dt) {
             try {
-                const varK1 = [...this.variables.state];
-                const varK2 = [...this.variables.state];
-                const varK3 = [...this.variables.state];
-                const velK1 = [...this.velocities.state];
-                const velK2 = [...this.velocities.state];
-                const velK3 = [...this.velocities.state];
-                const k1 = this.acceleration(...this.variables.state, ...this.velocities.state, ...this.constants.state);
+                const varK1 = [...this.variables.values];
+                const varK2 = [...this.variables.values];
+                const varK3 = [...this.variables.values];
+                const velK1 = [...this.variables.velocities];
+                const velK2 = [...this.variables.velocities];
+                const velK3 = [...this.variables.velocities];
+                const k1 = this.acceleration(...this.variables.values, ...this.variables.velocities, ...this.constants.values);
                 updateState(varK1, velK1, k1, dt / 2);
-                const k2 = this.acceleration(...varK1, ...velK1, ...this.constants.state);
+                const k2 = this.acceleration(...varK1, ...velK1, ...this.constants.values);
                 updateState(varK2, velK2, k2, dt / 2);
-                const k3 = this.acceleration(...varK2, ...velK2, ...this.constants.state);
+                const k3 = this.acceleration(...varK2, ...velK2, ...this.constants.values);
                 updateState(varK3, velK3, k3, dt);
-                const k4 = this.acceleration(...varK3, ...velK3, ...this.constants.state);
+                const k4 = this.acceleration(...varK3, ...velK3, ...this.constants.values);
                 const n = this.variables.symbols.length;
                 const k = new Array(n);
                 for (let i = 0; i < n; ++i)
                     k[i] = (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
-                updateState(this.variables.state, this.velocities.state, k, dt);
+                updateState(this.variables.values, this.variables.velocities, k, dt);
+                return true;
             }
             catch (error) {
                 console.log('ERROR IN UPDATE:', error);
+                return false;
             }
         }
     }

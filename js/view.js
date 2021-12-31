@@ -33,6 +33,7 @@ function initView() {
     canvas.height = rect.height * dpr;
     ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
+    setScale();
     window.onresize = initView;
 }
 //# sourceMappingURL=view.js.map

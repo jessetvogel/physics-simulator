@@ -2,11 +2,30 @@ function $(id: string): HTMLElement {
     return document.getElementById(id);
 }
 
-function create(tag: string, content = '', attr: { [k: string]: string } = {}) {
-    let elem = document.createElement(tag);
-    elem.innerHTML = content;
-    for (let a in attr)
-        elem.setAttribute(a, attr[a]);
+// function create(tag: string, content = '', attr: { [k: string]: string } = {}) {
+//     let elem = document.createElement(tag);
+//     elem.innerHTML = content;
+//     for (let a in attr)
+//         elem.setAttribute(a, attr[a]);
+//     return elem;
+// }
+
+function create(tag: string, properties?: { [key: string]: any }, content?: string | HTMLElement | HTMLElement[]): HTMLElement {
+    const elem = document.createElement(tag);
+
+    if (properties !== undefined) {
+        for (const key in properties) {
+            if (key.startsWith('@')) elem.addEventListener(key.substring(1), properties[key]);
+            else elem.setAttribute(key, properties[key]);
+        }
+    }
+
+    if (content !== undefined) {
+        if (typeof (content) === 'string') elem.innerHTML = content;
+        if (content instanceof HTMLElement) elem.append(content);
+        if (Array.isArray(content)) for (const child of content) elem.append(child);
+    }
+
     return elem;
 }
 

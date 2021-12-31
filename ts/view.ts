@@ -49,9 +49,7 @@ function initView() {
     ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
+    setScale();
+
     window.onresize = initView;
 }
-
-
-
-

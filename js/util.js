@@ -1,11 +1,25 @@
 function $(id) {
     return document.getElementById(id);
 }
-function create(tag, content = '', attr = {}) {
-    let elem = document.createElement(tag);
-    elem.innerHTML = content;
-    for (let a in attr)
-        elem.setAttribute(a, attr[a]);
+function create(tag, properties, content) {
+    const elem = document.createElement(tag);
+    if (properties !== undefined) {
+        for (const key in properties) {
+            if (key.startsWith('@'))
+                elem.addEventListener(key.substring(1), properties[key]);
+            else
+                elem.setAttribute(key, properties[key]);
+        }
+    }
+    if (content !== undefined) {
+        if (typeof (content) === 'string')
+            elem.innerHTML = content;
+        if (content instanceof HTMLElement)
+            elem.append(content);
+        if (Array.isArray(content))
+            for (const child of content)
+                elem.append(child);
+    }
     return elem;
 }
 function clear(elem) {

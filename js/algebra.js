@@ -75,6 +75,8 @@ var Algebra;
                 return add(timeDerivative(f.args[0], timeDerivatives), timeDerivative(f.args[0], timeDerivatives));
             if (f.fn == 'multiply')
                 return add(multiply(timeDerivative(f.args[0], timeDerivatives), f.args[1]), multiply(f.args[0], timeDerivative(f.args[1], timeDerivatives)));
+            if (f.fn == 'divide')
+                return divide(subtract(multiply(f.args[1], timeDerivative(f.args[0], timeDerivatives)), multiply(f.args[0], timeDerivative(f.args[1], timeDerivatives))), pow(f.args[1], Algebra.constant('2')));
             if (f.fn == 'pow')
                 return multiply(multiply(f.args[1], pow(f.args[0], subtract(f.args[1], constant('1')))), timeDerivative(f.args[0], timeDerivatives));
         }
