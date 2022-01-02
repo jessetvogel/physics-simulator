@@ -18,12 +18,12 @@ class Simulation {
             script: '',
             lagrangian: '0'
         };
-        this.system = null;
+        this.system = new Physics.System();
         this.renderFunction = null;
         this.interval = null;
     }
 
-    refresh(): void {
+    reset(): void {
         try {
             const d = this.description;
             // Set physics
@@ -41,6 +41,7 @@ class Simulation {
                 ...this.system.constants.symbols
             ];
             this.renderFunction = new Function(...symbols, d.script);
+            simulation.render(); // draw first frame already
         } catch (error) {
             console.log('ERROR:', error);
         }
@@ -52,12 +53,17 @@ class Simulation {
     }
 
     render(): boolean {
-        if (this.system == null) return false;
+        if (this.renderFunction === null) return false;
         try {
-            const oldFillStyle = ctx.fillStyle;
-            ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.fillStyle = oldFillStyle;
+            // Clear canvas
+            // const oldFillStyle = ctx.fillStyle;
+            // ctx.fillStyle = 'rgba(0, 0, 0, 0.)';
+            // ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            // ctx.fillStyle = oldFillStyle;
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            // Draw foreground
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--clr-text');
             this.renderFunction(
                 ...this.system.variables.values,
                 ...this.system.variables.velocities,
@@ -100,7 +106,7 @@ class Simulation {
         try {
             const description = JSON.parse(b64_to_utf8(str));
             this.description = description;
-            this.refresh();
+            this.reset();
         } catch (error) {
             console.log(`Failed to deserialize: ${error}`);
         }

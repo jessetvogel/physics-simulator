@@ -2,7 +2,7 @@ var Parser;
 (function (Parser_1) {
     const FUNCTIONS = ['sin', 'cos'];
     const SEPARATORS = ['(', ')', '+', '*', '-', '/', '^'];
-    const PRECEDENCE = { '+': 1, '-': 1, '*': 2, '/': 2, '^': 3 };
+    const PRECEDENCE = { '+': 1, '-': 1, '*': 2, '/': 3, '^': 4 };
     class Lexer {
         constructor(input) {
             this.input = input;

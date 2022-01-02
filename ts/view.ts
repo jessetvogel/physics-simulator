@@ -49,7 +49,12 @@ function initView() {
     ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
+    // Render simulation frame
+    simulation.render();
+
+    // Draw the scale in the corner of canvas
     setScale();
 
+    // Reinitialize view on resizing of window
     window.onresize = initView;
 }

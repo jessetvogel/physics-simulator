@@ -121,5 +121,18 @@ var Algebra;
         });
     }
     Algebra.toJS = toJS;
+    function toTex(expr) {
+        return expr.toTex().replace(/\\cdot/g, '');
+    }
+    Algebra.toTex = toTex;
 })(Algebra || (Algebra = {}));
+math.SymbolNode.prototype._toTex = function (options) {
+    let match = /^dd(\w+)$/.exec(this.name);
+    if (match)
+        return `{\\ddot{${match[1]}}}`;
+    match = /^d(\w+)$/.exec(this.name);
+    if (match)
+        return `{\\dot{${match[1]}}}`;
+    return `{${this.name}}`;
+};
 //# sourceMappingURL=algebra.js.map

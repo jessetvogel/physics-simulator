@@ -7,24 +7,24 @@ function init() {
         d.variables.symbols.push(name);
         d.variables.values.push(0);
         d.variables.velocities.push(0);
-        simulation.refresh();
-        updateVariableDefinitions();
+        simulation.reset();
+        updateLayout();
     });
     onClick($('button-add-constant'), function () {
         const name = $('input-new-symbol').value;
         const d = simulation.description;
         d.constants.symbols.push(name);
         d.constants.values.push(0);
-        simulation.refresh();
-        updateVariableDefinitions();
+        simulation.reset();
+        updateLayout();
     });
     onChange($('textarea-render-script'), function () {
         simulation.description.script = this.value;
-        simulation.refresh();
+        simulation.reset();
     });
     onChange($('input-lagrangian'), function () {
         simulation.description.lagrangian = this.value;
-        simulation.refresh();
+        simulation.reset();
     });
     onClick($('button-start'), function () {
         if (simulation.isRunning()) {
@@ -39,23 +39,24 @@ function init() {
     onClick($('button-reset'), () => {
         simulation.description.lagrangian = $('input-lagrangian').value;
         simulation.description.script = $('textarea-render-script').value;
-        simulation.refresh();
-        simulation.render();
-        setEquations();
+        simulation.reset();
+        updateLayout();
     });
-    initView();
-    updateVariableDefinitions();
-    const sp = 400.0;
+    onClick($('button-save-preset'), () => {
+        const name = $('input-preset-name').value;
+        storePreset(name, simulation.description);
+    });
+    const speed = 250.0;
     onKeyDown(document.body, function (event) {
         if (document.activeElement == document.body) {
             if (event.key === 'ArrowLeft')
-                view.centerSpeed.x = -sp;
+                view.centerSpeed.x = -speed;
             if (event.key === 'ArrowRight')
-                view.centerSpeed.x = sp;
+                view.centerSpeed.x = speed;
             if (event.key === 'ArrowUp')
-                view.centerSpeed.y = sp;
+                view.centerSpeed.y = speed;
             if (event.key === 'ArrowDown')
-                view.centerSpeed.y = -sp;
+                view.centerSpeed.y = -speed;
         }
     });
     onKeyUp(document.body, function (event) {
@@ -72,12 +73,12 @@ function init() {
     });
     onWheel(document.body, function (event) {
         if (document.activeElement == document.body) {
-            view.zoom *= Math.exp(0.005 * event.deltaY);
+            view.zoom *= Math.exp(-0.005 * event.deltaY);
             simulation.render();
             setScale();
         }
     });
-    const dt = 1.0 / 60.0;
+    const dt = 1.0 / 30.0;
     setInterval(function () {
         if (view.centerSpeed.x != 0.0 || view.centerSpeed.y != 0.0) {
             view.center.x += view.centerSpeed.x / view.zoom * dt;
@@ -85,65 +86,64 @@ function init() {
             simulation.render();
         }
     }, 1000.0 * dt);
-}
-function updateVariableDefinitions() {
-    const table = $('symbols');
-    clear(table);
-    const d = simulation.description;
-    for (let i = 0; i < d.variables.symbols.length; ++i) {
-        table.append(create('tr', {}, [
-            create('td', { 'class': 'symbol' }, `$${d.variables.symbols[i]}$`),
-            create('td', {}, create('input', {
-                'placeholder': 'value', 'value': `${d.variables.values[i]}`, '@change': function () {
-                    const f = parseFloat(this.value);
-                    if (f == f)
-                        d.variables.values[i] = f;
-                }
-            })),
-            create('td', {}, create('input', {
-                'placeholder': 'velocity', 'value': `${d.variables.velocities[i]}`, '@change': function () {
-                    const f = parseFloat(this.value);
-                    if (f == f)
-                        d.variables.velocities[i] = f;
-                }
-            })),
-            create('td', {}, create('span', {
-                'class': 'remove', '@click': () => {
-                    d.variables.symbols.splice(i, 1);
-                    d.variables.values.splice(i, 1);
-                    d.variables.velocities.splice(i, 1);
-                    updateVariableDefinitions();
-                }
-            }))
-        ]));
-    }
-    for (let i = 0; i < d.constants.symbols.length; ++i) {
-        table.append(create('tr', {}, [
-            create('td', { 'class': 'symbol' }, `$${d.constants.symbols[i]}$`),
-            create('td', {}, create('input', {
-                'placeholder': 'value', 'value': `${d.constants.values[i]}`, '@change': function () {
-                    const f = parseFloat(this.value);
-                    if (f == f)
-                        d.constants.values[i] = f;
-                }
-            })),
-            create('td'),
-            create('td', {}, create('span', {
-                'class': 'remove', '@click': () => {
-                    d.constants.symbols.splice(i, 1);
-                    d.constants.values.splice(i, 1);
-                    updateVariableDefinitions();
-                }
-            }))
-        ]));
-    }
-    MathJax.typeset([table]);
+    initView();
+    initPresets();
+    updateLayout();
 }
 window.onload = init;
+function updateLayout() {
+    const d = simulation.description;
+    $('input-lagrangian').value = d.lagrangian;
+    const textarea = $('textarea-render-script');
+    textarea.value = d.script;
+    textarea.style.height = '1px';
+    textarea.style.height = textarea.scrollHeight + 'px';
+    const table = $('symbols-list');
+    clear(table);
+    const items = [];
+    for (let i = 0; i < d.variables.symbols.length; ++i)
+        items.push([d.variables, i]);
+    for (let i = 0; i < d.constants.symbols.length; ++i)
+        items.push([d.constants, i]);
+    for (const [list, i] of items) {
+        table.append(create('span', { 'class': 'symbol' }, `$${list.symbols[i]}$`));
+        table.append(create('input', {
+            'placeholder': 'value', 'value': `${list.values[i]}`, '@change': function () {
+                const f = parseFloat(this.value);
+                if (f == f)
+                    list.values[i] = f;
+            }
+        }));
+        if ('velocities' in list) {
+            table.append(create('input', {
+                'placeholder': 'velocity', 'value': `${list.velocities[i]}`, '@change': function () {
+                    const f = parseFloat(this.value);
+                    if (f == f)
+                        list.velocities[i] = f;
+                }
+            }));
+        }
+        else {
+            table.append(create('span'));
+        }
+        table.append(create('span', {
+            'class': 'remove', '@click': () => {
+                list.symbols.splice(i, 1);
+                list.values.splice(i, 1);
+                list.velocities.splice(i, 1);
+                updateLayout();
+            }
+        }));
+    }
+    MathJax.typeset([table]);
+    setEquations();
+}
 function setEquations() {
-    const equations = $('equations');
-    setHTML(equations, simulation.system.equations.map(eq => `<div>$${eq.toTex().replace(/\b(dd)(\w+)/g, '\\$1ot{$2}').replace(/\\cdot/g, '')} = 0$</div>`).join(''));
-    MathJax.typeset([equations]);
+    if (simulation.system != null) {
+        const equations = $('equations');
+        setHTML(equations, simulation.system.equations.map(eq => `<div>$${Algebra.toTex(eq)} = 0$</div>`).join(''));
+        MathJax.typeset([equations]);
+    }
 }
 function setScale() {
     const scale = $('scale');

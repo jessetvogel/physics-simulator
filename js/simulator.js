@@ -6,11 +6,11 @@ class Simulation {
             script: '',
             lagrangian: '0'
         };
-        this.system = null;
+        this.system = new Physics.System();
         this.renderFunction = null;
         this.interval = null;
     }
-    refresh() {
+    reset() {
         try {
             const d = this.description;
             this.system = new Physics.System();
@@ -25,6 +25,7 @@ class Simulation {
                 ...this.system.constants.symbols
             ];
             this.renderFunction = new Function(...symbols, d.script);
+            simulation.render();
         }
         catch (error) {
             console.log('ERROR:', error);
@@ -37,13 +38,11 @@ class Simulation {
             this.stop();
     }
     render() {
-        if (this.system == null)
+        if (this.renderFunction === null)
             return false;
         try {
-            const oldFillStyle = ctx.fillStyle;
-            ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.fillStyle = oldFillStyle;
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--clr-text');
             this.renderFunction(...this.system.variables.values, ...this.system.variables.velocities, ...this.system.constants.values);
             return true;
         }
@@ -79,7 +78,7 @@ class Simulation {
         try {
             const description = JSON.parse(b64_to_utf8(str));
             this.description = description;
-            this.refresh();
+            this.reset();
         }
         catch (error) {
             console.log(`Failed to deserialize: ${error}`);

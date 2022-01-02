@@ -85,7 +85,7 @@ namespace Physics {
             for (let i = 0; i < n; ++i) {
                 const coeffs = Algebra.coefficients(this.equations[i], as);
                 A[i] = coeffs.slice(0, n);
-                b[i] = coeffs[n];
+                b[i] = Algebra.negate(coeffs[n]);
             }
 
             // Function to compute acceleration

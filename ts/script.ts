@@ -3,9 +3,8 @@ declare var MathJax: any;
 const simulation = new Simulation();
 const view = new View();
 
-// const parameters: { symbol: string, dynamic: boolean, initial: number }[] = [];
-
 function init(): void {
+    // Handlers
     onClick($('button-add-variable'), function () {
         // Name for new symbol
         const name = ($('input-new-symbol') as HTMLInputElement).value;
@@ -14,10 +13,9 @@ function init(): void {
         d.variables.symbols.push(name);
         d.variables.values.push(0);
         d.variables.velocities.push(0);
-        // Refresh simulation
-        simulation.refresh();
-        // Update panel
-        updateVariableDefinitions();
+        // Reset simulation & update layout
+        simulation.reset();
+        updateLayout();
     });
 
     onClick($('button-add-constant'), function () {
@@ -27,24 +25,23 @@ function init(): void {
         const d = simulation.description;
         d.constants.symbols.push(name);
         d.constants.values.push(0);
-        // Refresh simulation
-        simulation.refresh();
-        // Update panel
-        updateVariableDefinitions();
+        // Reset simulation & update layout
+        simulation.reset();
+        updateLayout();
     });
 
     onChange($('textarea-render-script'), function () {
         // Update description
         simulation.description.script = (this as HTMLTextAreaElement).value;
-        // Refresh simulation
-        simulation.refresh();
+        // Reset simulation & update layout
+        simulation.reset();
     });
 
     onChange($('input-lagrangian'), function () {
         // Update description
         simulation.description.lagrangian = (this as HTMLInputElement).value;
-        // Refresh simulation
-        simulation.refresh();
+        // Reset simulation
+        simulation.reset();
     })
 
     onClick($('button-start'), function () {
@@ -61,23 +58,24 @@ function init(): void {
         // Update Lagrangian and script, and refresh
         simulation.description.lagrangian = ($('input-lagrangian') as HTMLInputElement).value;
         simulation.description.script = ($('textarea-render-script') as HTMLTextAreaElement).value;
-        simulation.refresh();
-        simulation.render();
-
-        setEquations();
+        // Reset simulation & update layout
+        simulation.reset();
+        updateLayout();
     });
 
-    initView();
-    updateVariableDefinitions();
+    onClick($('button-save-preset'), () => {
+        const name = ($('input-preset-name') as HTMLInputElement).value;
+        storePreset(name, simulation.description);
+    });
 
-    // View navigation
-    const sp = 400.0;
+    // Navigation handlers
+    const speed = 250.0;
     onKeyDown(document.body, function (event) {
         if (document.activeElement == document.body) {
-            if (event.key === 'ArrowLeft') view.centerSpeed.x = -sp;
-            if (event.key === 'ArrowRight') view.centerSpeed.x = sp;
-            if (event.key === 'ArrowUp') view.centerSpeed.y = sp;
-            if (event.key === 'ArrowDown') view.centerSpeed.y = -sp;
+            if (event.key === 'ArrowLeft') view.centerSpeed.x = -speed;
+            if (event.key === 'ArrowRight') view.centerSpeed.x = speed;
+            if (event.key === 'ArrowUp') view.centerSpeed.y = speed;
+            if (event.key === 'ArrowDown') view.centerSpeed.y = -speed;
         }
     });
 
@@ -92,13 +90,13 @@ function init(): void {
 
     onWheel(document.body, function (event) {
         if (document.activeElement == document.body) {
-            view.zoom *= Math.exp(0.005 * event.deltaY);
+            view.zoom *= Math.exp(-0.005 * event.deltaY);
             simulation.render();
             setScale();
         }
     });
 
-    const dt = 1.0 / 60.0;
+    const dt = 1.0 / 30.0;
     setInterval(function () {
         if (view.centerSpeed.x != 0.0 || view.centerSpeed.y != 0.0) {
             view.center.x += view.centerSpeed.x / view.zoom * dt;
@@ -106,69 +104,68 @@ function init(): void {
             simulation.render();
         }
     }, 1000.0 * dt);
-}
 
-function updateVariableDefinitions(): void {
-    const table = $('symbols');
-    clear(table);
+    // Other inits
+    initView();
+    initPresets();
 
-    const d = simulation.description;
-    for (let i = 0; i < d.variables.symbols.length; ++i) {
-        table.append(create('tr', {}, [
-            create('td', { 'class': 'symbol' }, `$${d.variables.symbols[i]}$`),
-            create('td', {}, create('input', {
-                'placeholder': 'value', 'value': `${d.variables.values[i]}`, '@change': function () {
-                    const f = parseFloat(this.value);
-                    if (f == f) d.variables.values[i] = f;
-                }
-            })),
-            create('td', {}, create('input', {
-                'placeholder': 'velocity', 'value': `${d.variables.velocities[i]}`, '@change': function () {
-                    const f = parseFloat(this.value);
-                    if (f == f) d.variables.velocities[i] = f;
-                }
-            })),
-            create('td', {}, create('span', {
-                'class': 'remove', '@click': () => {
-                    d.variables.symbols.splice(i, 1);
-                    d.variables.values.splice(i, 1);
-                    d.variables.velocities.splice(i, 1);
-                    updateVariableDefinitions();
-                }
-            }))
-        ]));
-    }
-
-    for (let i = 0; i < d.constants.symbols.length; ++i) {
-        table.append(create('tr', {}, [
-            create('td', { 'class': 'symbol' }, `$${d.constants.symbols[i]}$`),
-            create('td', {}, create('input', {
-                'placeholder': 'value', 'value': `${d.constants.values[i]}`, '@change': function () {
-                    const f = parseFloat(this.value);
-                    if (f == f) d.constants.values[i] = f;
-                }
-            })),
-            create('td'),
-            create('td', {}, create('span', {
-                'class': 'remove', '@click': () => {
-                    d.constants.symbols.splice(i, 1);
-                    d.constants.values.splice(i, 1);
-                    updateVariableDefinitions();
-                }
-            }))
-        ]));
-    }
-
-    MathJax.typeset([table]);
+    // Update layout
+    updateLayout();
 }
 
 window.onload = init;
 
+function updateLayout(): void {
+    const d = simulation.description;
+    // Lagrangian and render script
+    ($('input-lagrangian') as HTMLInputElement).value = d.lagrangian;
+    const textarea = $('textarea-render-script') as HTMLTextAreaElement;
+    textarea.value = d.script;
+    textarea.style.height = '1px'; textarea.style.height = textarea.scrollHeight + 'px';
+    // Table of symbols
+    const table = $('symbols-list');
+    clear(table);
+    const items: [Physics.SymbolState, number][] = [];
+    for (let i = 0; i < d.variables.symbols.length; ++i) items.push([d.variables, i]);
+    for (let i = 0; i < d.constants.symbols.length; ++i) items.push([d.constants, i]);
+    for (const [list, i] of items) {
+        table.append(create('span', { 'class': 'symbol' }, `$${list.symbols[i]}$`));
+        table.append(create('input', {
+            'placeholder': 'value', 'value': `${list.values[i]}`, '@change': function () {
+                const f = parseFloat(this.value);
+                if (f == f) list.values[i] = f;
+            }
+        }));
+        if ('velocities' in list) {
+            table.append(create('input', {
+                'placeholder': 'velocity', 'value': `${list.velocities[i]}`, '@change': function () {
+                    const f = parseFloat(this.value);
+                    if (f == f) list.velocities[i] = f;
+                }
+            }));
+        } else {
+            table.append(create('span'));
+        }
+        table.append(create('span', {
+            'class': 'remove', '@click': () => {
+                list.symbols.splice(i, 1);
+                list.values.splice(i, 1);
+                list.velocities.splice(i, 1);
+                updateLayout();
+            }
+        }));
+    }
+
+    MathJax.typeset([table]);
+    setEquations();
+}
 
 function setEquations() {
-    const equations = $('equations');
-    setHTML(equations, simulation.system.equations.map(eq => `<div>$${eq.toTex().replace(/\b(dd)(\w+)/g, '\\$1ot{$2}').replace(/\\cdot/g, '')} = 0$</div>`).join(''));
-    MathJax.typeset([equations]);
+    if (simulation.system != null) {
+        const equations = $('equations');
+        setHTML(equations, simulation.system.equations.map(eq => `<div>$${Algebra.toTex(eq)} = 0$</div>`).join(''));
+        MathJax.typeset([equations]);
+    }
 }
 
 function setScale() {

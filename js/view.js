@@ -33,6 +33,7 @@ function initView() {
     canvas.height = rect.height * dpr;
     ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
+    simulation.render();
     setScale();
     window.onresize = initView;
 }

@@ -13,12 +13,13 @@
     <script type="text/javascript" src="js/view.js"></script>
     <script type="text/javascript" src="js/draw.js"></script>
     <script type="text/javascript" src="js/simulator.js"></script>
+    <script type="text/javascript" src="js/presets.js"></script>
     <script type="text/javascript" src="js/script.js"></script>
     <script type="text/javascript" src="js/mathjax-config.js"></script>
     <script id="MathJax-script" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
 </head>
 
-<body>
+<body class="dark">
     <div id="content">
         <div id="canvas-wrapper">
             <canvas id="canvas"></canvas>
@@ -33,22 +34,27 @@
             <span>Lagrangian</span>
             <input id="input-lagrangian" />
         </div>
-        <div id="panel">
+        <div id="menu">
             <div>
                 <div class="heading">Variables</div>
-                <table id="symbols"></table>
-                <table>
-                    <tr>
-                        <td><input id="input-new-symbol" /></td>
-                        <td><button id="button-add-constant">+constant</button></td>
-                        <td><button id="button-add-variable">+variable</button></td>
-                    </tr>
-                </table>
+                <div id="symbols-list"></div>
+                <div id="new-symbol-bar">
+                    <input id="input-new-symbol" /></td>
+                    <button id="button-add-constant">+constant</button>
+                    <button id="button-add-variable">+variable</button>
+                </div>
             </div>
-            <div style="padding: 0px 7px;">
+            <div>
                 <div class="heading">Rendering</div>
                 <textarea id="textarea-render-script"
                     oninput="this.style.height='1px';this.style.height=this.scrollHeight+'px';"></textarea>
+            </div>
+            <div>
+                <div class="heading">Presets</div>
+                <div id="presets"></div>
+                <div id="preset-save-bar">
+                    <input id="input-preset-name" /><button id="button-save-preset">Save</button>
+                </div>
             </div>
         </div>
     </div>
