@@ -60,6 +60,8 @@ var Physics;
             };
         }
         update(dt) {
+            if (this.acceleration == null)
+                return false;
             try {
                 const varK1 = [...this.variables.values];
                 const varK2 = [...this.variables.values];

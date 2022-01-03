@@ -5,7 +5,7 @@ body {
     --clr-button-background: #ffffff;
     --clr-input-background: #ffffff;
     --clr-item-selected: rgba(0, 0, 0, 0.05);
-    --clr-item-hover: rgba(0, 0, 0, 0.10);
+    --clr-item-hover: rgba(0, 0, 0, 0.1);
     --clr-text: black;
     --clr-canvas-background: #ffffff;
     --size-padding: 6px;
@@ -14,12 +14,12 @@ body {
 
 body.dark {
     --clr-menu-background: #313233;
-    --clr-button-background: #4b4747;
+    --clr-button-background: #6c6f73;
     --clr-item-selected: rgba(255, 255, 255, 0.05);
-    --clr-item-hover: rgba(255, 255, 255, 0.10);
+    --clr-item-hover: rgba(255, 255, 255, 0.1);
     --clr-input-background: #4a4c4f;
     --clr-text: #dde1e7;
-    --clr-canvas-background: #282a2b;
+    --clr-canvas-background: #1e1e1e;
 }
 
 html,
@@ -144,7 +144,7 @@ span.remove {
 }
 
 body.dark span.remove {
-    filter: invert(1.0);
+    filter: invert(1);
 }
 
 textarea {
@@ -216,7 +216,8 @@ input {
     padding: var(--size-padding);
 }
 
-#button-start, #button-reset {
+#button-start,
+#button-reset {
     background-position: center;
     background-repeat: no-repeat;
     background-size: 20px;
@@ -241,8 +242,9 @@ input {
     background-image: url("../img/pause.png");
 }
 
-body.dark #button-start, body.dark #button-reset {
-    filter: invert(1.0);
+body.dark #button-start,
+body.dark #button-reset {
+    filter: invert(1);
 }
 
 #equations {
@@ -304,4 +306,23 @@ body.dark #button-start, body.dark #button-reset {
     flex-direction: row;
     gap: var(--size-padding);
     padding: var(--size-padding);
+}
+
+#button-theme {
+    position: fixed;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    opacity: 0.25;
+    cursor: pointer;
+    transition: opacity 0.2s ease 0s;
+    background-image: url("../img/moon.png");
+    background-position: center center;
+    background-size: cover;
+}
+
+body.dark #button-theme {
+    background-image: url("../img/sun.png");
 }

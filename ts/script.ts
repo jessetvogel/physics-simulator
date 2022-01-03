@@ -108,6 +108,7 @@ function init(): void {
     // Other inits
     initView();
     initPresets();
+    initTheme();
 
     // Update layout
     updateLayout();
@@ -179,4 +180,32 @@ function setScale() {
     if (length >= 1000.0) text = `${(length / 1000.0).toFixed(2)}km`;
 
     setText(scale, text);
+}
+
+function initTheme(): void {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const cookieTheme = getCookie('theme');
+    if (cookieTheme !== null)
+        setTheme(cookieTheme === 'dark');
+    else
+        setTheme(prefersDark);
+    onClick($('button-theme'), function () {
+        document.cookie = `theme=${setTheme(null) ? 'dark' : 'light'}`;
+    });
+    setTimeout(function () { // little hack to prevent initial transition, but it works
+        const sheet = window.document.styleSheets[0];
+        sheet.insertRule('* { transition: background-color 0.5s, color 0.5s, filter 0.5s; }', sheet.cssRules.length);
+    }, 100);
+}
+
+function setTheme(dark: boolean): boolean {
+    if (dark === true) {
+        document.body.classList.add('dark');
+        return true;
+    }
+    if (dark === false) {
+        document.body.classList.remove('dark');
+        return false;
+    }
+    return setTheme(!document.body.classList.contains('dark'));
 }

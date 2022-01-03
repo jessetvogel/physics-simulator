@@ -111,6 +111,7 @@ namespace Physics {
         }
 
         update(dt: number): boolean {
+            if (this.acceleration == null) return false;
             try {
                 // Forward Euler
                 // const a = this.acceleration(...this.variables.state, ...this.velocities.state, ...this.constants.state);

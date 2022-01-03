@@ -57,6 +57,10 @@ class Simulation {
     start() {
         if (this.system == null)
             return false;
+        if (this.renderFunction == null)
+            return false;
+        if (this.system.acceleration == null)
+            return false;
         this.stop();
         const dt = 1.0 / 60.0;
         const simulator = this;
