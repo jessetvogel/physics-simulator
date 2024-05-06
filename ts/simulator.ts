@@ -1,12 +1,12 @@
-type SimulationDescription = {
+type SimulatorDescription = {
     variables: Physics.SymbolState,
     constants: Physics.SymbolState,
     script: string,
     lagrangian: string
 };
 
-class Simulation {
-    description: SimulationDescription;
+class Simulator {
+    description: SimulatorDescription;
     system: Physics.System;
     renderFunction: Function;
     interval: number;
@@ -41,7 +41,7 @@ class Simulation {
                 ...this.system.constants.symbols
             ];
             this.renderFunction = new Function(...symbols, d.script);
-            simulation.render(); // draw first frame already
+            this.render(); // draw first frame already
         } catch (error) {
             console.log('ERROR:', error);
         }
@@ -53,7 +53,6 @@ class Simulation {
     }
 
     render(): boolean {
-        if (this.renderFunction === null) return false;
         try {
             // Clear canvas
             // const oldFillStyle = ctx.fillStyle;
@@ -62,8 +61,13 @@ class Simulation {
             // ctx.fillStyle = oldFillStyle;
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+            // Render grid
+            this.renderGrid();
+
             // Draw foreground
             ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--clr-text');
+            if (this.renderFunction === null)
+                return false;
             this.renderFunction(
                 ...this.system.variables.values,
                 ...this.system.variables.velocities,
@@ -73,6 +77,35 @@ class Simulation {
         } catch (error) {
             console.log('ERROR IN RENDER:', error);
             return false;
+        }
+    }
+
+    renderGrid(): void {
+        // Draw grid
+        const gridUnitMin = 16.0;
+        const gridUnitStep = 5.0;
+        let gridUnit = camera.world2view(1.0);
+        let gridOrigin = camera.world2view({ x: 0.0, y: 0.0 });
+        while (gridUnit >= gridUnitMin * gridUnitStep) gridUnit /= gridUnitStep;
+        while (gridUnit < gridUnitMin) gridUnit *= gridUnitStep;
+
+        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--clr-grid');;
+
+        let x = gridOrigin.x - gridUnit * Math.floor(gridOrigin.x / gridUnit);
+        while (x < ctx.canvas.width) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0.0);
+            ctx.lineTo(x, ctx.canvas.height);
+            ctx.stroke();
+            x += gridUnit;
+        }
+        let y = gridOrigin.y - gridUnit * Math.floor(gridOrigin.y / gridUnit);
+        while (y < ctx.canvas.height) {
+            ctx.beginPath();
+            ctx.moveTo(0.0, y);
+            ctx.lineTo(ctx.canvas.width, y);
+            ctx.stroke();
+            y += gridUnit;
         }
     }
 
@@ -114,4 +147,3 @@ class Simulation {
         }
     }
 };
-

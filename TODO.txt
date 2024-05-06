@@ -1,0 +1,35 @@
+- Better UI
+    - Explain controls
+    - Arrow keys to move
+    - Labels for variables vs constants
+    - Different font
+    - Outline > shadows
+    - Add control for centering the camera
+    - Make controls text rather than icon
+    - Lowercase draw methods, or just `circle` and `line` ?
+    - "Equations of motion"
+    - Optimize the physics code: keep the equations of motions when only altering initial conditions or velocities
+        - Same for hitting the reset button
+    - Allow for changing of variables while the simulation is happening
+        - Think about this: difference between initial values and current values
+    - Do we want to show current values also somewhere?
+    - Default light theme, but a nice one
+    - Nicer colors
+    - Allow for `theta`, `alpha`, etc. (automatically detect greek letters and render nicely)
+    - Initialize some system initially (so that 'start' can be pressed)
+    - Show error box next to render script when there is a rendering error
+
+------------------------------------------------------------------
+
+
+- draw.ts: draw methods for rendering script
+
+- class Simulator
+    - description
+    - system
+    - renderMethod
+    - intervalID
+
+- class System
+    - containing the physics data: variables, constants, the lagrangian, etc.
+

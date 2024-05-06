@@ -16,11 +16,11 @@ function getCookie(name: string): string {
     return null;
 }
 
-let presets: { [key: string]: SimulationDescription } = {};
+let presets: { [key: string]: SimulatorDescription } = {};
 
-const defaultPresets = "{\"pendulum\":{\"variables\":{\"symbols\":[\"a\"],\"values\":[1.5],\"velocities\":[0]},\"constants\":{\"symbols\":[\"m\",\"g\",\"L\"],\"values\":[1,9.81,1]},\"script\":\"x = Math.sin(a) * L\\ny = -Math.cos(a) * L\\n\\ndrawCircle(0, 0, 0.01)\\ndrawCircle(x, y, 0.10)\\ndrawLine(0, 0, x, y)\",\"lagrangian\":\"1/2 * m * da^2 * L^2 - m * g * (-cos(a) * L)\"},\"gravity\":{\"variables\":{\"symbols\":[\"x_1\",\"y_1\",\"x_2\",\"y_2\"],\"values\":[1,0,-1,0],\"velocities\":[0,1,0,-1]},\"constants\":{\"symbols\":[\"m_1\",\"m_2\",\"G\"],\"values\":[1,1,6]},\"script\":\"drawCircle(x_1, y_1, 0.10)\\ndrawCircle(x_2, y_2, 0.10)\",\"lagrangian\":\"0.5 * m_1 * (dx_1^2 + dy_1^2) + 0.5 * m_2 * (dx_2^2 + dy_2^2) + G * m_1 * m_2 / ((x_1 - x_2)^2 + (y_1 - y_2)^2)^(1/2)\"}}";
+const defaultPresets = "{\"pendulum\":{\"variables\":{\"symbols\":[\"a\"],\"values\":[1.5],\"velocities\":[0]},\"constants\":{\"symbols\":[\"m\",\"g\",\"L\"],\"values\":[1,9.81,1]},\"script\":\"x = Math.sin(a) * L\\ny = -Math.cos(a) * L\\n\\ncircle(0, 0, 0.01)\\ncircle(x, y, 0.10)\\nline(0, 0, x, y)\",\"lagrangian\":\"1/2 * m * da^2 * L^2 - m * g * (-cos(a) * L)\"},\"gravity\":{\"variables\":{\"symbols\":[\"x_1\",\"y_1\",\"x_2\",\"y_2\"],\"values\":[1,0,-1,0],\"velocities\":[0,1,0,-1]},\"constants\":{\"symbols\":[\"m_1\",\"m_2\",\"G\"],\"values\":[1,1,6]},\"script\":\"circle(x_1, y_1, 0.10)\\ncircle(x_2, y_2, 0.10)\",\"lagrangian\":\"0.5 * m_1 * (dx_1^2 + dy_1^2) + 0.5 * m_2 * (dx_2^2 + dy_2^2) + G * m_1 * m_2 / ((x_1 - x_2)^2 + (y_1 - y_2)^2)^(1/2)\"}}";
 
-function loadPreset(name: string): SimulationDescription {
+function loadPreset(name: string): SimulatorDescription {
     try {
         let cookie = getCookie('presets');
         if (cookie === null) cookie = defaultPresets;
@@ -32,7 +32,7 @@ function loadPreset(name: string): SimulationDescription {
     }
 }
 
-function storePreset(name: string, description: SimulationDescription): void {
+function storePreset(name: string, description: SimulatorDescription): void {
     if (name !== null) presets[name] = description;
     setCookie('presets', JSON.stringify(presets), 365);
     initPresets();
@@ -46,11 +46,12 @@ function initPresets(): void {
         list.append(create('div', {
             'class': 'preset',
             '@click': function (event: MouseEvent) {
-                simulation.description = loadPreset(name);
-                simulation.reset();
+                simulator.description = loadPreset(name);
+                simulator.reset();
                 updateLayout();
                 list.childNodes.forEach((node, key, parent) => removeClass(node as HTMLElement, 'selected'));
                 addClass(this, 'selected');
+                ($('input-preset-name') as HTMLInputElement).value = name;
             }
         }, [
             create('span', {}, name),
@@ -62,4 +63,7 @@ function initPresets(): void {
             })
         ]));
     }
+
+    if (list.children.length > 0)
+        (list.children[0] as HTMLElement).click();
 }

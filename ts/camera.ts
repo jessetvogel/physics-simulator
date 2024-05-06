@@ -1,6 +1,6 @@
 type Point = { x: number, y: number };
 
-class View {
+class Camera {
     center: Point; // (world) coordinates of the center of the view
     zoom: number; // in pixels / meter
     centerSpeed: Point;
@@ -50,7 +50,7 @@ function initView() {
     ctx.scale(dpr, dpr);
 
     // Render simulation frame
-    simulation.render();
+    simulator.render();
 
     // Draw the scale in the corner of canvas
     setScale();

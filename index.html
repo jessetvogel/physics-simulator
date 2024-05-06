@@ -5,33 +5,27 @@
     <meta charset="utf-8" />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/style.css" />
-    <script type="text/javascript" src="js/util.js"></script>
     <script type="text/javascript" src="js/math.js"></script>
-    <script type="text/javascript" src="js/algebra.js"></script>
-    <script type="text/javascript" src="js/physics.js"></script>
-    <script type="text/javascript" src="js/parser.js"></script>
-    <script type="text/javascript" src="js/view.js"></script>
-    <script type="text/javascript" src="js/draw.js"></script>
-    <script type="text/javascript" src="js/simulator.js"></script>
-    <script type="text/javascript" src="js/presets.js"></script>
     <script type="text/javascript" src="js/script.js"></script>
-    <script type="text/javascript" src="js/mathjax-config.js"></script>
-    <script id="MathJax-script" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.css" integrity="sha384-KiWOvVjnN8qwAZbuQyWDIbfCLFhLXNETzBQjA/92pIowpC0d2O3nppDGQVgwd2nB" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.js" integrity="sha384-0fdwu/T/EQMsQlrHCCHoH10pkPLlKA1jL5dFyUOvB3lfeT2540/2g6YgSi2BL14p" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/auto-render.min.js" integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" crossorigin="anonymous"></script>
 </head>
 
-<body class="dark">
+<body>
     <div id="content">
         <div id="canvas-wrapper">
             <canvas id="canvas"></canvas>
-            <div id="buttons">
-                <div id="button-start"></div>
-                <div id="button-reset"></div>
+            <div id="controls">
+                <button id="button-start">start</button>
+                <button id="button-reset">reset</button>
+                <button id="button-center">center</button>
             </div>
             <div id="equations"></div>
             <div id="scale"></div>
         </div>
         <div id="toolbar">
-            <span>Lagrangian</span>
+            <span class="heading">Lagrangian</span>
             <input id="input-lagrangian" />
         </div>
         <div id="menu">
@@ -40,12 +34,12 @@
                 <div id="symbols-list"></div>
                 <div id="new-symbol-bar">
                     <input id="input-new-symbol" /></td>
-                    <button id="button-add-constant">+constant</button>
-                    <button id="button-add-variable">+variable</button>
+                    <button id="button-add-constant">+&nbsp;constant</button>
+                    <button id="button-add-variable">+&nbsp;variable</button>
                 </div>
             </div>
             <div>
-                <div class="heading">Rendering</div>
+                <div class="heading">Render Script</div>
                 <textarea id="textarea-render-script"
                     oninput="this.style.height='1px';this.style.height=this.scrollHeight+'px';"></textarea>
             </div>
@@ -53,7 +47,8 @@
                 <div class="heading">Presets</div>
                 <div id="presets"></div>
                 <div id="preset-save-bar">
-                    <input id="input-preset-name" /><button id="button-save-preset">Save</button>
+                    <input id="input-preset-name" placeholder="preset name" /><button
+                        id="button-save-preset">save</button>
                 </div>
             </div>
         </div>

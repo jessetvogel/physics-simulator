@@ -2,3 +2,13 @@
     font-family: 'museosans';
     src: url('../fonts/museosans.otf');
 }
+
+@font-face {
+    font-family: 'JetBrainsMono';
+    src: url('../fonts/JetBrainsMono-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'OpenSans';
+    src: url('../fonts/OpenSans-Regular.ttf');
+}
