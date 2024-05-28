@@ -511,7 +511,7 @@ function getCookie(name) {
     return null;
 }
 let presets = {};
-const defaultPresets = "{\"pendulum\":{\"variables\":{\"symbols\":[\"a\"],\"values\":[1.5],\"velocities\":[0]},\"constants\":{\"symbols\":[\"m\",\"g\",\"L\"],\"values\":[1,9.81,1]},\"script\":\"x = Math.sin(a) * L\\ny = -Math.cos(a) * L\\n\\ncircle(0, 0, 0.01)\\ncircle(x, y, 0.10)\\nline(0, 0, x, y)\",\"lagrangian\":\"1/2 * m * da^2 * L^2 - m * g * (-cos(a) * L)\"},\"gravity\":{\"variables\":{\"symbols\":[\"x_1\",\"y_1\",\"x_2\",\"y_2\"],\"values\":[1,0,-1,0],\"velocities\":[0,1,0,-1]},\"constants\":{\"symbols\":[\"m_1\",\"m_2\",\"G\"],\"values\":[1,1,6]},\"script\":\"circle(x_1, y_1, 0.10)\\ncircle(x_2, y_2, 0.10)\",\"lagrangian\":\"0.5 * m_1 * (dx_1^2 + dy_1^2) + 0.5 * m_2 * (dx_2^2 + dy_2^2) + G * m_1 * m_2 / ((x_1 - x_2)^2 + (y_1 - y_2)^2)^(1/2)\"}}";
+const defaultPresets = "{\"pendulum\":{\"variables\":{\"symbols\":[\"a\"],\"values\":[1.5],\"velocities\":[0]},\"constants\":{\"symbols\":[\"m\",\"g\",\"L\"],\"values\":[1,9.81,1]},\"script\":\"x = Math.sin(a) * L\\ny = -Math.cos(a) * L\\n\\ncircle(0, 0, 0.01)\\ncircle(x, y, 0.10)\\nline(0, 0, x, y)\",\"lagrangian\":\"1/2 * m * da^2 * L^2 - m * g * (-cos(a) * L)\"},\"gravity\":{\"variables\":{\"symbols\":[\"x_1\",\"y_1\",\"x_2\",\"y_2\"],\"values\":[1,0,-1,0],\"velocities\":[0,1,0,-1]},\"constants\":{\"symbols\":[\"m_1\",\"m_2\",\"G\"],\"values\":[1,1,6]},\"script\":\"circle(x_1, y_1, 0.10)\\ncircle(x_2, y_2, 0.10)\",\"lagrangian\":\"0.5 * m_1 * (dx_1^2 + dy_1^2) + 0.5 * m_2 * (dx_2^2 + dy_2^2) + G * m_1 * m_2 \/ ((x_1 - x_2)^2 + (y_1 - y_2)^2)^(1\/2)\"},\"double pendulum\":{\"variables\":{\"symbols\":[\"a_1\",\"a_2\"],\"values\":[1,1],\"velocities\":[-1,1]},\"constants\":{\"symbols\":[\"l_1\",\"l_2\",\"m_1\",\"m_2\",\"g\"],\"values\":[1,1,1,1,10]},\"script\":\"x_1 = l_1 * Math.sin(a_1)\\ny_1 = -l_1 * Math.cos(a_1)\\n\\nx_2 = x_1 + l_2 * Math.sin(a_2)\\ny_2 = y_1 - l_2 * Math.cos(a_2)\\n\\nm = Math.max(m_1, m_2)\\n\\ncircle(0, 0, 0.01)\\ncircle(x_1, y_1, 0.10 * Math.sqrt(m_1 \/ m))\\ncircle(x_2, y_2, 0.10 * Math.sqrt(m_2 \/ m))\\nline(0, 0, x_1, y_1)\\nline(x_1, y_1, x_2, y_2)\",\"lagrangian\":\"1\/2 * (m_1 + m_2) * l_1^2 * da_1^2 + 1\/2 * m_2 * l_2^2 * da_2^2 + m_2 * l_1 * l_2 * da_1 * da_2 * cos(a_1 - a_2) + (m_1 + m_2) * g * l_1 * cos(a_1) + m_2 * g * l_2 * cos(a_2)\"}}";
 function loadPreset(name) {
     try {
         let cookie = getCookie('presets');
@@ -555,8 +555,6 @@ function initPresets() {
             })
         ]));
     }
-    if (list.children.length > 0)
-        list.children[0].click();
 }
 var simulator = null;
 var camera = null;
@@ -659,6 +657,8 @@ function init() {
     }, 1000.0 * dt);
     initView();
     initPresets();
+    if ($('presets').children.length > 0)
+        $('presets').children[0].click();
     initTheme();
     updateLayout();
     setTimeout(() => simulator.render(), 10);
@@ -707,7 +707,8 @@ function updateLayout() {
             'class': 'remove', '@click': () => {
                 list.symbols.splice(i, 1);
                 list.values.splice(i, 1);
-                list.velocities.splice(i, 1);
+                if ('velocities' in list)
+                    list.velocities.splice(i, 1);
                 updateLayout();
             }
         }));
@@ -742,7 +743,7 @@ function setScale() {
     setText(scale, text);
 }
 function initTheme() {
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = false;
     const cookieTheme = getCookie('theme');
     if (cookieTheme !== null)
         setTheme(cookieTheme === 'dark');

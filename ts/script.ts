@@ -125,7 +125,7 @@ function init(): void {
 
     // Other inits
     initView();
-    initPresets();
+    initPresets(); /* Load first preset */ if ($('presets').children.length > 0) ($('presets').children[0] as HTMLElement).click();
     initTheme();
 
     // Update layout
@@ -176,7 +176,7 @@ function updateLayout(): void {
             'class': 'remove', '@click': () => {
                 list.symbols.splice(i, 1);
                 list.values.splice(i, 1);
-                list.velocities.splice(i, 1);
+                if ('velocities' in list) list.velocities.splice(i, 1);
                 updateLayout();
             }
         }));
@@ -213,7 +213,7 @@ function setScale() {
 }
 
 function initTheme(): void {
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = false; //window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const cookieTheme = getCookie('theme');
     if (cookieTheme !== null)
         setTheme(cookieTheme === 'dark');
