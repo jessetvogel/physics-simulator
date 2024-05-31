@@ -9,7 +9,7 @@ var Algebra;
     }
     Algebra.negate = negate;
     function subtract(x, y) {
-        return add(x, negate(y));
+        return new math.OperatorNode('-', 'subtract', [x, y]);
     }
     Algebra.subtract = subtract;
     function multiply(x, y) {
@@ -72,7 +72,9 @@ var Algebra;
             if (f.fn == 'unaryMinus')
                 return negate(timeDerivative(f.args[0], timeDerivatives));
             if (f.fn == 'add')
-                return add(timeDerivative(f.args[0], timeDerivatives), timeDerivative(f.args[0], timeDerivatives));
+                return add(timeDerivative(f.args[0], timeDerivatives), timeDerivative(f.args[1], timeDerivatives));
+            if (f.fn == 'subtract')
+                return subtract(timeDerivative(f.args[0], timeDerivatives), timeDerivative(f.args[1], timeDerivatives));
             if (f.fn == 'multiply')
                 return add(multiply(timeDerivative(f.args[0], timeDerivatives), f.args[1]), multiply(f.args[0], timeDerivative(f.args[1], timeDerivatives)));
             if (f.fn == 'divide')
@@ -83,7 +85,13 @@ var Algebra;
         if (f instanceof math.ParenthesisNode) {
             return timeDerivative(f.content, timeDerivatives);
         }
-        throw `Could not take time derivative of ${f.toString()}`;
+        if (f instanceof math.FunctionNode) {
+            if (f.fn.name == 'sin')
+                return multiply(func('cos', [f.args[0]]), timeDerivative(f.args[0], timeDerivatives));
+            if (f.fn.name == 'cos')
+                return negate(multiply(func('sin', [f.args[0]]), timeDerivative(f.args[0], timeDerivatives)));
+        }
+        throw `Could not take time derivative of ${f.toString()} [${f.type} ${f.fn}]`;
     }
     Algebra.timeDerivative = timeDerivative;
     function toJS(expr) {
@@ -433,7 +441,7 @@ var Physics;
                 const dLdx = Algebra.derivative(L, Algebra.symbol(x));
                 const dLdv = Algebra.derivative(L, Algebra.symbol(v));
                 const ddLdvdt = Algebra.timeDerivative(dLdv, this.timeDerivatives);
-                const eq = Algebra.subtract(dLdx, ddLdvdt);
+                const eq = Algebra.subtract(ddLdvdt, dLdx);
                 this.equations.push(Algebra.simplify(eq));
             }
             const n = this.variables.symbols.length;
@@ -511,7 +519,7 @@ function getCookie(name) {
     return null;
 }
 let presets = {};
-const defaultPresets = "{\"pendulum\":{\"variables\":{\"symbols\":[\"a\"],\"values\":[1.5],\"velocities\":[0]},\"constants\":{\"symbols\":[\"m\",\"g\",\"L\"],\"values\":[1,9.81,1]},\"script\":\"x = Math.sin(a) * L\\ny = -Math.cos(a) * L\\n\\ncircle(0, 0, 0.01)\\ncircle(x, y, 0.10)\\nline(0, 0, x, y)\",\"lagrangian\":\"1/2 * m * da^2 * L^2 - m * g * (-cos(a) * L)\"},\"gravity\":{\"variables\":{\"symbols\":[\"x_1\",\"y_1\",\"x_2\",\"y_2\"],\"values\":[1,0,-1,0],\"velocities\":[0,1,0,-1]},\"constants\":{\"symbols\":[\"m_1\",\"m_2\",\"G\"],\"values\":[1,1,6]},\"script\":\"circle(x_1, y_1, 0.10)\\ncircle(x_2, y_2, 0.10)\",\"lagrangian\":\"0.5 * m_1 * (dx_1^2 + dy_1^2) + 0.5 * m_2 * (dx_2^2 + dy_2^2) + G * m_1 * m_2 \/ ((x_1 - x_2)^2 + (y_1 - y_2)^2)^(1\/2)\"},\"double pendulum\":{\"variables\":{\"symbols\":[\"a_1\",\"a_2\"],\"values\":[1,1],\"velocities\":[-1,1]},\"constants\":{\"symbols\":[\"l_1\",\"l_2\",\"m_1\",\"m_2\",\"g\"],\"values\":[1,1,1,1,10]},\"script\":\"x_1 = l_1 * Math.sin(a_1)\\ny_1 = -l_1 * Math.cos(a_1)\\n\\nx_2 = x_1 + l_2 * Math.sin(a_2)\\ny_2 = y_1 - l_2 * Math.cos(a_2)\\n\\nm = Math.max(m_1, m_2)\\n\\ncircle(0, 0, 0.01)\\ncircle(x_1, y_1, 0.10 * Math.sqrt(m_1 \/ m))\\ncircle(x_2, y_2, 0.10 * Math.sqrt(m_2 \/ m))\\nline(0, 0, x_1, y_1)\\nline(x_1, y_1, x_2, y_2)\",\"lagrangian\":\"1\/2 * (m_1 + m_2) * l_1^2 * da_1^2 + 1\/2 * m_2 * l_2^2 * da_2^2 + m_2 * l_1 * l_2 * da_1 * da_2 * cos(a_1 - a_2) + (m_1 + m_2) * g * l_1 * cos(a_1) + m_2 * g * l_2 * cos(a_2)\"}}";
+const defaultPresets = "{\"pendulum\":{\"variables\":{\"symbols\":[\"a\"],\"values\":[1.5],\"velocities\":[0]},\"constants\":{\"symbols\":[\"m\",\"g\",\"L\"],\"values\":[1,9.81,1]},\"script\":\"x = Math.sin(a) * L\\ny = -Math.cos(a) * L\\n\\ncircle(0, 0, 0.01)\\ncircle(x, y, 0.10)\\nline(0, 0, x, y)\",\"lagrangian\":\"1\/2 * m * da^2 * L^2 - m * g * (-cos(a) * L)\"},\"gravity\":{\"variables\":{\"symbols\":[\"x_1\",\"y_1\",\"x_2\",\"y_2\"],\"values\":[1,0,-1,0],\"velocities\":[0,1,0,-1]},\"constants\":{\"symbols\":[\"m_1\",\"m_2\",\"G\"],\"values\":[1,1,6]},\"script\":\"circle(x_1, y_1, 0.10)\\ncircle(x_2, y_2, 0.10)\",\"lagrangian\":\"0.5 * m_1 * (dx_1^2 + dy_1^2) + 0.5 * m_2 * (dx_2^2 + dy_2^2) + G * m_1 * m_2 \/ ((x_1 - x_2)^2 + (y_1 - y_2)^2)^(1\/2)\"},\"double pendulum\":{\"variables\":{\"symbols\":[\"a_1\",\"a_2\"],\"values\":[2,2],\"velocities\":[0,0]},\"constants\":{\"symbols\":[\"l_1\",\"l_2\",\"m_1\",\"m_2\",\"g\"],\"values\":[1,1,1,1,10]},\"script\":\"x_1 = l_1 * Math.sin(a_1)\\ny_1 = -l_1 * Math.cos(a_1)\\n\\nx_2 = x_1 + l_2 * Math.sin(a_2)\\ny_2 = y_1 - l_2 * Math.cos(a_2)\\n\\nm = Math.max(m_1, m_2)\\n\\ncircle(0, 0, 0.01)\\ncircle(x_1, y_1, 0.10 * Math.sqrt(m_1 \/ m))\\ncircle(x_2, y_2, 0.10 * Math.sqrt(m_2 \/ m))\\nline(0, 0, x_1, y_1)\\nline(x_1, y_1, x_2, y_2)\",\"lagrangian\":\"1\/2 * (m_1 + m_2) * l_1^2 * da_1^2 + 1\/2 * m_2 * l_2^2 * da_2^2 + m_2 * l_1 * l_2 * da_1 * da_2 * cos(a_1 - a_2) + (m_1 + m_2) * g * l_1 * cos(a_1) + m_2 * g * l_2 * cos(a_2)\"}}";
 function loadPreset(name) {
     try {
         let cookie = getCookie('presets');

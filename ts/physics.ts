@@ -58,16 +58,16 @@ namespace Physics {
                 const v = this.timeDerivatives[x];
 
                 // Take derivatives of Lagrangian
+                // console.log(`For x = ${x} and v = ${v} :`);
                 const dLdx = Algebra.derivative(L, Algebra.symbol(x));
+                // console.log(`dL/dx = ${Algebra.simplify(dLdx).toString()}`);
                 const dLdv = Algebra.derivative(L, Algebra.symbol(v));
+                // console.log(`dL/dv = ${Algebra.simplify(dLdv).toString()}`);
                 const ddLdvdt = Algebra.timeDerivative(dLdv, this.timeDerivatives);
-
-                // console.log('dL/dx = ', dLdx.toString());
-                // console.log('dL/dv = ', dLdv.toString());
-                // console.log('ddL/dv/dt = ', ddLdvdt.toString());
+                // console.log(`d(dL/dv)/dt = ${Algebra.simplify(ddLdvdt).toString()}`);
 
                 // Euler--Lagrange equation
-                const eq = Algebra.subtract(dLdx, ddLdvdt);
+                const eq = Algebra.subtract(ddLdvdt, dLdx);
                 this.equations.push(Algebra.simplify(eq));
             }
 

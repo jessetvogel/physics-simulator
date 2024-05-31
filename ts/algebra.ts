@@ -13,7 +13,7 @@ namespace Algebra {
     }
 
     export function subtract(x: Expression, y: Expression): Expression {
-        return add(x, negate(y));
+        return new math.OperatorNode('-', 'subtract', [x, y]);
     }
 
     export function multiply(x: Expression, y: Expression): Expression {
@@ -66,6 +66,12 @@ namespace Algebra {
         return coefficients;
     }
 
+    // export function timeDerivative(f: Expression, timeDerivatives: { [name: string]: string }): Expression {
+    //     const derivative = _timeDerivative(f, timeDerivatives);
+    //     console.log(`d/dt (${f.toString()}) = ${Algebra.simplify(derivative).toString()}`);
+    //     return derivative;
+    // }
+
     export function timeDerivative(f: Expression, timeDerivatives: { [name: string]: string }): Expression {
         if (f instanceof math.ConstantNode) return constant('0');
         if (f instanceof math.SymbolNode) {
@@ -78,7 +84,11 @@ namespace Algebra {
             if (f.fn == 'unaryMinus') return negate(timeDerivative(f.args[0], timeDerivatives));
             if (f.fn == 'add') return add(
                 timeDerivative(f.args[0], timeDerivatives),
-                timeDerivative(f.args[0], timeDerivatives)
+                timeDerivative(f.args[1], timeDerivatives)
+            );
+            if (f.fn == 'subtract') return subtract(
+                timeDerivative(f.args[0], timeDerivatives),
+                timeDerivative(f.args[1], timeDerivatives)
             );
             if (f.fn == 'multiply') return add(
                 multiply(timeDerivative(f.args[0], timeDerivatives), f.args[1]),
@@ -96,8 +106,18 @@ namespace Algebra {
         if (f instanceof math.ParenthesisNode) {
             return timeDerivative(f.content, timeDerivatives);
         }
+        if (f instanceof math.FunctionNode) {
+            if (f.fn.name == 'sin') return multiply(
+                func('cos', [f.args[0]]),
+                timeDerivative(f.args[0], timeDerivatives)
+            );
+            if (f.fn.name == 'cos') return negate(multiply(
+                func('sin', [f.args[0]]),
+                timeDerivative(f.args[0], timeDerivatives)
+            ));
+        }
 
-        throw `Could not take time derivative of ${f.toString()}`;
+        throw `Could not take time derivative of ${f.toString()} [${f.type} ${(f as any).fn}]`;
     }
 
     export function toJS(expr: Expression): string {
