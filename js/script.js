@@ -56,6 +56,11 @@ var Algebra;
         for (const x of symbols)
             dict[x] = constant('0');
         coefficients[symbols.length] = simplify(subsitute(expr, dict));
+        const subs = {};
+        for (let i = 0; i < symbols.length; ++i)
+            subs[symbols[i]] = constant('0');
+        for (let i = 0; i < symbols.length + 1; ++i)
+            coefficients[i] = simplify(subsitute(coefficients[i], subs));
         return coefficients;
     }
     Algebra.coefficients = coefficients;

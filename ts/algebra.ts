@@ -63,6 +63,14 @@ namespace Algebra {
         for (const x of symbols) dict[x] = constant('0');
         coefficients[symbols.length] = simplify(subsitute(expr, dict));
 
+        // Since `simplify` cannot do everything, it sometimes happens that some symbols are still present in the coefficients, even though they should not be.
+        // Hence, we might as well substitute all symbols in the coefficients by zero, as the coefficients should be independent of the symbols anyway.
+        const subs: { [key: string]: Expression } = {};
+        for (let i = 0; i < symbols.length; ++i)
+            subs[symbols[i]] = constant('0');
+        for (let i = 0; i < symbols.length + 1; ++i)
+            coefficients[i] = simplify(subsitute(coefficients[i], subs));
+
         return coefficients;
     }
 

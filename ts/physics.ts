@@ -92,9 +92,6 @@ namespace Physics {
             const functionA = new Function(...symbols, `return [${A.map(row => `[${row.map(x => Algebra.toJS(x)).join(',')}]`).join(',')}];`);
             const functionB = new Function(...symbols, `return [${b.map(x => `[${Algebra.toJS(x)}]`).join(',')}];`);
 
-            // console.log(functionA.toString());
-            // console.log(functionB.toString());
-
             // Set update function
             this.acceleration = function (...args: number[]): number[] {
                 const A = functionA(...args);
